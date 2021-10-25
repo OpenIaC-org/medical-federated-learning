@@ -38,3 +38,4 @@ typing-extensions==3.10.0.2
 urllib3==1.26.7
 Werkzeug==2.0.2
 wincertstore==0.2
+websockets==10.0
