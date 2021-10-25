@@ -19,6 +19,7 @@ class Client:
     
     async def handler(self):
         async with websockets.connect('ws://localhost:8000', ping_interval=None) as websocket:
+            self.websocket = websocket
             while True:
                 if self.my_status == ClientStatus.NOT_CONNECTED:
                     await self.connect(websocket)
@@ -39,10 +40,10 @@ class Client:
     
     async def receive_model(self, websocket):
         model = await websocket.recv()
-        with open(f'./models/{self.id}.pt', 'wb') as f:
+        with open(f'./client_models/{self.id}.pt', 'wb') as f:
             f.write(model)
         self.model = Net2nn()
-        self.model.load_state_dict(torch.load(f'./models/{self.id}.pt'))
+        self.model.load_state_dict(torch.load(f'./client_models/{self.id}.pt'))
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01, momentum=0.9)
         self.criterion = nn.CrossEntropyLoss()
         print('Received model')
@@ -66,7 +67,13 @@ class Client:
             print("epoch: {:3.0f}".format(epoch+1) + " | train accuracy: {:7.4f}".format(train_accuracy) + " | test accuracy: {:7.4f}".format(test_accuracy))
         print("------ Training finished ------")
 
-
+        await self.send_model()
+    
+    async def send_model(self):
+        print('Sending model to server')
+        await self.websocket.send('model_update')
+        torch.save(self.model.state_dict(), f'./client_models/{self.id}.pt')
+        await self.websocket.send(open(f'./client_models/{self.id}.pt', 'rb').read())
 
     
     def load_data(self):
