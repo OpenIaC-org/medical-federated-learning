@@ -1,11 +1,15 @@
-FROM python:latest
+FROM ubuntu:latest
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
+    python3.9 python3-pip python3.9-dev
 
 COPY requirements.txt /server/
 
-RUN pip install -r /server/requirements.txt
+RUN pip install --no-cache-dir -r /server/requirements.txt
 
-ADD * /server/
+ADD . /server/
 
 WORKDIR /server/
 
-RUN python server.py
+RUN mkdir client_models

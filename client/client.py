@@ -18,25 +18,37 @@ class Client:
         
     
     async def handler(self):
-        async with websockets.connect('ws://localhost:8000', ping_interval=None) as websocket:
-            self.websocket = websocket
-            while True:
-                if self.my_status == ClientStatus.NOT_CONNECTED:
-                    await self.connect(websocket)
-                elif self.my_status == ClientStatus.CONNECTED:
-                    msg = await websocket.recv()
-                    if msg == 'model':
-                        await self.receive_model(websocket)
+        self.websocket = await self.create_websocket()
+        while True:
+            if self.my_status == ClientStatus.NOT_CONNECTED:
+                await self.connect(self.websocket)
+            elif self.my_status == ClientStatus.CONNECTED:
+                msg = await self.websocket.recv()
+                if msg == 'model':
+                    await self.receive_model(self.websocket)
+
+    async def create_websocket(self):
+        try:
+            return await websockets.connect('ws://localhost:8000', ping_interval=None)
+        except:
+            print('Connection failed, trying again in 2 seconds')
+            await asyncio.sleep(2)
+            return await self.create_websocket()
                     
     async def connect(self, websocket):
-        await websocket.send('connect')
-        res = await websocket.recv()
-        self.id = str(res)
-        self.my_status = ClientStatus.CONNECTED
-        print('Connected to server. My Id is ' + self.id)
-        self.client_number = int(await websocket.recv())
-        print(f'I am client number {self.client_number}')
-        self.load_data()
+        try:
+            await websocket.send('connect')
+            res = await websocket.recv()
+            self.id = str(res)
+            self.my_status = ClientStatus.CONNECTED
+            print('Connected to server. My Id is ' + self.id)
+            self.client_number = int(await websocket.recv())
+            print(f'I am client number {self.client_number}')
+            self.load_data()
+        except:
+            print('Connection failed, trying again in 2 seconds')
+            await asyncio.sleep(2)
+            await self.connect(websocket)
     
     async def receive_model(self, websocket):
         model = await websocket.recv()

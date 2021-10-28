@@ -167,7 +167,7 @@ class Server:
 
 server = Server()
 
-start_server = websockets.serve(server.handler, "localhost", PORT, ping_interval=None)
+start_server = websockets.serve(server.handler, "", PORT, ping_interval=None)
 
 asyncio.get_event_loop().run_until_complete(start_server)
 print('Server started on port ' + str(PORT))

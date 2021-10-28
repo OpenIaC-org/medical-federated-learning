@@ -5,33 +5,25 @@ services:
     build: server/
     ports:
       - 8000:8000
-    command: >
-      sh -c "pip install -r requirements.txt &&
-            python ./server.py"
+    command: python3 -u ./server.py
 
-  # client-1:
-  #   build: client/
-  #   network_mode: host
-  #   depends_on:
-  #     - server
-  #   command: >
-  #     sh -c "pip install -r requirements.txt &&
-  #           python ./client.py"
+  client-1:
+    build: client/
+    network_mode: host
+    depends_on:
+      - server
+    command: python3 -u ./client.py
 
-  # client-2:
-  #   build: client/
-  #   network_mode: host
-  #   depends_on:
-  #     - server
-  #   command: >
-  #     sh -c "pip install -r requirements.txt &&
-  #           python ./client.py"
+  client-2:
+    build: client/
+    network_mode: host
+    depends_on:
+      - server
+    command: python3 -u ./client.py
 
-  # client-3:
-  #   build: client/
-  #   network_mode: host
-  #   depends_on:
-  #     - server
-  #   command: >
-  #     sh -c "pip install -r requirements.txt &&
-  #           python ./client.py"
+  client-3:
+    build: client/
+    network_mode: host
+    depends_on:
+      - server
+    command: python3 -u ./client.py
